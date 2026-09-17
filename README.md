@@ -1,97 +1,270 @@
 # MoodMeter 📊🎭 — Decodificador de Expresiones Faciales con IA
 
-**MoodMeter** es un playground interactivo y didáctico de visión por computadora diseñado para analizar emociones y microexpresiones faciales en tiempo real. 
+**MoodMeter** es una aplicación de visión por computadora que utiliza una cámara web o una imagen para analizar expresiones faciales y estimar la distribución de emociones mediante inteligencia artificial.
 
-Impulsado por **FastAPI** en el backend y la librería de aprendizaje profundo **DeepFace**, el sistema traduce capturas de video en distribuciones de probabilidad emocional usando una **Red Neuronal Convolucional (CNN)** de última generación y despliega un dashboard con estética premium **Glassmorphism en Modo Oscuro** junto con explicaciones conceptuales integradas.
-
----
-
-## 🧠 ¿Cómo Decodifica la IA las Emociones?
-
-A diferencia de las computadoras, los seres humanos percibimos expresiones faciales de forma instantánea y subconsciente. Para que una máquina replique esto, implementa un pipeline convolucional jerárquico paso a paso:
-
-```
-[ Entrada: Webcam o Foto ]
-          │
-          ▼
-[ Detector de Rostro (OpenCV) ] ──> Recorta el rostro y alinea ojos y boca.
-          │
-          ▼
-[ Capas Convolucionales de la CNN ] ──> Extraen rasgos abstractos (comisura de labios, cejas).
-          │
-          ▼
-[ Capa Completamente Conectada ] ──> Genera 7 puntuaciones brutas (logits) de emoción.
-          │
-          ▼
-[ Función de Activación Softmax ] ──> Normaliza los logits en probabilidades (suman 100%).
-          │
-          ├───────────────────────────┐
-          ▼                           ▼
-[ Medidores Neón en Vivo ]     [ Curva Dinámica (Mood Timeline) ]
-```
-
-### La Matemática Detrás: Función Softmax
-La última capa de la red de emociones arroja puntuaciones crudas ($z_i$) para cada emoción básica. Para traducir estas puntuaciones abstractas en porcentajes legibles que sumen exactamente **100%**, la red implementa la función matemática **Softmax**:
-
-$$\sigma(\mathbf{z})_i = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}$$
-
-* La función aplica un operador exponencial ($e^{z_i}$) a cada puntuación para asegurar que todos los valores sean estrictamente positivos.
-* Luego, divide cada valor por la suma de todos los exponenciales ($\sum e^{z_j}$), convirtiendo los números en una distribución de probabilidad coherente.
-* La probabilidad más alta indica la **emoción dominante** calculada por la IA.
+El proyecto utiliza **FastAPI** como backend, **DeepFace** para el análisis facial y **OpenCV** para el procesamiento de imágenes.
 
 ---
 
-## 📂 Estructura del Repositorio
+## 🧠 ¿Cómo funciona?
 
-La arquitectura del proyecto está optimizada para ser ligera, rápida y 100% libre de bases de datos persistentes:
+El procesamiento de una imagen sigue, de manera general, este flujo:
 
+```text
+[ Webcam o imagen ]
+        │
+        ▼
+[ Procesamiento de imagen con OpenCV ]
+        │
+        ▼
+[ Detección y análisis del rostro ]
+        │
+        ▼
+[ DeepFace / modelo de reconocimiento facial ]
+        │
+        ▼
+[ Distribución de emociones ]
+        │
+        ▼
+[ Resultados mostrados en el navegador ]
 ```
+
+El sistema analiza el rostro detectado y devuelve una distribución de las emociones reconocidas por el modelo.
+
+---
+
+## 📂 Estructura del proyecto
+
+```text
 computerV/
 ├── app/
-│   ├── main.py                 # Servidor FastAPI con pipeline de inferencia DeepFace
+│   ├── main.py
 │   └── templates/
-│       ├── index.html          # Frontend premium en HTML5 con Canvas y webcam
-│       └── style.css           # Estilos de alta gama (neón, vidrio esmerilado y animaciones)
-├── requirements.txt            # Dependencias del proyecto de Python
-└── start.sh                    # Script bash para instalación y arranque automático
+│       ├── index.html
+│       └── style.css
+├── requirements.txt
+├── README.md
+└── start.sh
+```
+
+### Principales archivos
+
+- `app/main.py`: servidor y API de la aplicación.
+- `app/templates/index.html`: interfaz principal.
+- `app/templates/style.css`: estilos de la interfaz.
+- `requirements.txt`: dependencias necesarias para ejecutar el proyecto.
+- `start.sh`: script de inicio disponible para entornos compatibles con Bash.
+
+---
+
+# 🛠️ Instalación
+
+## Requisitos
+
+Antes de comenzar se necesita:
+
+- Python 3.10.
+- Git.
+- Una cámara web para utilizar la captura en vivo.
+- Conexión a Internet para instalar las dependencias y descargar los modelos necesarios de DeepFace durante la primera ejecución.
+
+---
+
+## 1. Clonar el repositorio
+
+Desde una terminal:
+
+```powershell
+git clone https://github.com/jonnathanub/computerV.git
+```
+
+Entrar al proyecto:
+
+```powershell
+cd computerV
 ```
 
 ---
 
-## 🛠️ Instalación y Arranque Automático
+## 2. Crear el entorno virtual
 
-Sigue estos sencillos pasos para instalar y poner en marcha **MoodMeter** en tu máquina local:
+En Windows:
 
-### 1. Navegar al Directorio del Proyecto
-```bash
-cd /Users/leonelmendiola/computerV
+```powershell
+python -m venv venv
 ```
 
-### 2. Arrancar la Aplicación
-El sistema incluye un script automatizado `start.sh` que se encargará de crear el entorno virtual (`venv`), actualizar `pip`, instalar todas las dependencias y levantar el servidor FastAPI:
-```bash
-./start.sh
+Activar el entorno virtual en PowerShell:
+
+```powershell
+venv\Scripts\Activate.ps1
 ```
 
-### 3. Abrir el Navegador
-Una vez que el servidor reporte estar listo, abre tu navegador en:
-👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+Si se utiliza CMD:
 
-> 💡 **Nota de Primera Ejecución**: La primera vez que presiones "Escanear Rostro", DeepFace descargará automáticamente los pesos preentrenados del clasificador de emociones de Keras (~20MB). Este proceso se realiza una sola vez de forma interna y tardará solo unos segundos según tu velocidad de internet.
+```cmd
+venv\Scripts\activate
+```
+
+Cuando el entorno esté activo, la terminal debe mostrar algo similar a:
+
+```text
+(venv) PS C:\...\computerV>
+```
 
 ---
 
-## 💻 Características del Dashboard
+## 3. Instalar las dependencias
 
-* **Captura Multidispositivo**: Si cuentas con cámara web activa, la rejilla láser cibernética escaneará tu rostro en vivo. Si no posees cámara web, haz clic en **Archivo** para subir cualquier fotografía local.
-* **Mira Láser Flotante**: Al completar el escaneo, verás un recuadro cibernético dashed de color cian dibujado exactamente sobre las coordenadas físicas de tu rostro.
-* **Gauges de Distribución**: Muestra barras neón de colores que representan el peso asignado por la red a cada emoción en tiempo real.
-* **Mood Timeline (Línea de Tiempo)**: Un gráfico dinámico hecho con HTML5 Canvas que conecta los puntos de tus escaneos secuenciales. La curva cambia de color dinámicamente según la emoción dominante registrada en cada paso, ilustrando tu transición emocional (ej. de enojo a alegría).
+Con el entorno virtual activado:
+
+```powershell
+python -m pip install --upgrade pip
+```
+
+Después:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+El archivo `requirements.txt` contiene las versiones de las librerías utilizadas para ejecutar y probar el proyecto.
 
 ---
 
-## ⚡ Tecnologías Utilizadas
-* **FastAPI** — API de alta velocidad en Python.
-* **DeepFace** — Framework de análisis facial inmersivo.
-* **OpenCV** — Localización y procesamiento espacial del rostro.
-* **HTML5 / CSS3 / JavaScript (ES6)** — Frontend premium inmersivo sin dependencias pesadas.
+# ▶️ Ejecutar la aplicación
+
+Con el entorno virtual activo, ejecutar:
+
+```powershell
+python -m uvicorn app.main:app --reload
+```
+
+Cuando el servidor se encuentre funcionando, aparecerá un mensaje similar a:
+
+```text
+Uvicorn running on http://127.0.0.1:8000
+```
+
+Abrir en el navegador:
+
+**http://127.0.0.1:8000**
+
+---
+
+## 🧠 Primera ejecución
+
+Durante la primera ejecución, **DeepFace puede descargar automáticamente los modelos necesarios para realizar el análisis facial**.
+
+Este proceso puede tardar dependiendo de la velocidad de Internet.
+
+Una vez descargados los modelos, las siguientes ejecuciones normalmente no requieren volver a descargarlos.
+
+---
+
+# 📷 Uso de la aplicación
+
+La aplicación permite trabajar con una cámara web o con una imagen.
+
+### Cámara web
+
+1. Abrir la aplicación en el navegador.
+2. Permitir el acceso a la cámara cuando el navegador lo solicite.
+3. Colocarse frente a la cámara.
+4. Ejecutar el análisis.
+5. Revisar la distribución de emociones mostrada por la aplicación.
+
+### Imagen
+
+Si no se dispone de cámara web, se puede utilizar la opción para seleccionar una imagen desde el equipo.
+
+---
+
+# 📊 Características
+
+- Captura mediante cámara web.
+- Carga de imágenes.
+- Detección y análisis facial.
+- Distribución de emociones.
+- Interfaz web interactiva.
+- Visualización de resultados.
+- Línea de tiempo para representar los análisis realizados.
+
+---
+
+# ⚙️ Tecnologías utilizadas
+
+- **Python 3.10**
+- **FastAPI**
+- **Uvicorn**
+- **DeepFace**
+- **TensorFlow / Keras**
+- **OpenCV**
+- **NumPy**
+- **HTML5**
+- **CSS3**
+- **JavaScript**
+
+---
+
+# 🔌 API
+
+El proyecto cuenta con un endpoint para realizar el análisis de una imagen:
+
+```text
+POST /api/analyze-mood
+```
+
+Este endpoint recibe la imagen y procesa el rostro mediante las herramientas de visión por computadora y DeepFace.
+
+---
+
+# ⚠️ Solución de problemas
+
+### La cámara no aparece
+
+Verificar que:
+
+- El navegador tenga permiso para utilizar la cámara.
+- Ninguna otra aplicación esté utilizando la cámara.
+- El dispositivo tenga una cámara disponible.
+
+También se puede utilizar una imagen cargada desde el equipo.
+
+### Error relacionado con OpenCV
+
+El proyecto utiliza:
+
+```text
+opencv-python==4.10.0.84
+```
+
+No se debe instalar simultáneamente `opencv-python-headless`, ya que la aplicación utiliza funcionalidades de OpenCV que requieren la instalación completa.
+
+### El servidor no inicia
+
+Comprobar que el entorno virtual esté activo:
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+Después instalar nuevamente las dependencias:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Y ejecutar:
+
+```powershell
+python -m uvicorn app.main:app --reload
+```
+
+---
+
+# 👨‍💻 Proyecto
+
+**MoodMeter — Decodificador de Expresiones Faciales con IA**
+
+Proyecto académico de visión por computadora y aprendizaje profundo.
